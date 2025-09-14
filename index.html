@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的个人网页</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 基础样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        
+        a {
+            text-decoration: none;
+            color: #4a6fa5;
+            transition: color 0.3s;
+        }
+        
+        a:hover {
+            color: #2c4974;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* 导航栏样式 */
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4a6fa5;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 1.5rem;
+        }
+        
+        .nav-links a {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            color: #4a6fa5;
+        }
+        
+        /* 主内容区域 */
+        main {
+            margin-top: 80px;
+        }
+        
+        section {
+            padding: 4rem 0;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 6rem 0;
+            background: linear-gradient(135deg, #6a93cb 0%, #4a6fa5 100%);
+            color: white;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: white;
+            color: #4a6fa5;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 关于我部分 */
+        .about-content {
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+        }
+        
+        .about-text {
+            flex: 1;
+        }
+        
+        .about-image {
+            flex: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .about-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* 作品集部分 */
+        .portfolio {
+            background-color: #f0f4f8;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .section-title h2 {
+            font-size: 2rem;
+            color: #4a6fa5;
+            margin-bottom: 0.5rem;
+        }
+        
+        .section-title p {
+            color: #666;
+        }
+        
+        .projects {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .project-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .project-image {
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .project-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .project-card:hover .project-image img {
+            transform: scale(1.05);
+        }
+        
+        .project-info {
+            padding: 1.5rem;
+        }
+        
+        .project-info h3 {
+            margin-bottom: 0.5rem;
+        }
+        
+        /* 联系表单 */
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+        }
+        
+        .form-group textarea {
+            min-height: 150px;
+        }
+        
+        /* 页脚 */
+        footer {
+            background: #2c3e50;
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            margin: 1rem 0;
+        }
+        
+        .social-links li {
+            margin: 0 0.5rem;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .social-links a:hover {
+            background: #4a6fa5;
+            transform: translateY(-3px);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .about-content {
+                flex-direction: column;
+            }
+            
+            .hero {
+                padding: 4rem 0;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">我的空间</div>
+                <ul class="nav-links">
+                    <li><a href="#home" class="active">首页</a></li>
+                    <li><a href="#about">关于我</a></li>
+                    <li><a href="#portfolio">作品集</a></li>
+                    <li><a href="#contact">联系我</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main>
+        <!-- 主页英雄区 -->
+        <section id="home" class="hero">
+            <div class="container">
+                <h1>欢迎来到我的个人空间</h1>
+                <p>我是USC第一深情兼世界一流摄影师，专注于留存世间那稍瞬即逝的美</p>
+                <a href="#portfolio" class="btn">查看我的作品</a>
+            </div>
+        </section>
+
+        <!-- 关于我部分 -->
+        <section id="about">
+            <div class="container">
+                <div class="about-content">
+                    <div class="about-text">
+                        <h2>关于我</h2>
+                        <p>USC第一深情，用镜头封存时光的诗人。世界一流摄影师，以光影雕刻刹那永恒，定格人间易逝之美。</p>
+                        <p>专注捕捉瞬息美好的视觉匠人。以镜头为笔，书写情感与光影的叙事，让每个瞬间都成为不朽诗篇。</p>
+                        <p>执着于留存世间流动的深情与美。用摄影对抗时间，将心跳般的瞬间转化为永恒的艺术印记。</p>
+                    </div>
+                    <div class="about-image">
+                        <img src="D:\test-site\images\01.jpg" alt="个人照片">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 作品集部分 -->
+        <section id="portfolio" class="portfolio">
+            <div class="container">
+                <div class="section-title">
+                    <h2>我的作品集</h2>
+                    <p>以下是我拍摄的神作</p>
+                </div>
+                <div class="projects">
+                    <!-- 项目1 -->
+                    <div class="project-card">
+                        <div class="project-image">
+                            <img src="D:\test-site\images\02.jpg" alt="项目1">
+                        </div>
+                        <div class="project-info">
+                            <h3>雨母校区图书馆</h3>
+                            <p>一个高端大气上档次的新图书馆，所有小南瓜为之震撼。</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 项目2 -->
+                    <div class="project-card">
+                        <div class="project-image">
+                            <img src="D:\test-site\images\03.jpg" alt="项目2">
+                        </div>
+                        <div class="project-info">
+                            <h3>衡山之巅</h3>
+                            <p>巍峨衡山，盘踞如龙，极目远眺，天地一体。</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 项目3 -->
+                    <div class="project-card">
+                        <div class="project-image">
+                            <img src="D:\test-site\images\04.jpg" alt="项目3">
+                        </div>
+                        <div class="project-info">
+                            <h3>长沙国金</h3>
+                            <p>长沙国金中心擎天而立，双塔摩云揽胜，玻璃幕墙折射星城流光，既是商业寰宇，亦是现代潇湘的地标注脚。</p>
+                        </div>
+                    </div>
+
+                    <!-- 项目4 -->
+                    <div class="project-card">
+                        <div class="project-image">
+                            <img src="D:\test-site\images\06.jpg" alt="项目4">
+                        </div>
+                        <div class="project-info">
+                            <h3>保卫里</h3>
+                            <p>青阶红墙藤蔓垂，老城烟火绕斜晖。铁轨蜿蜒时光缓，衡阳往事风中徊。</p>
+                        </div>
+                    </div>
+
+                    <!-- 项目5 -->
+                    <div class="project-card">
+                        <div class="project-image">
+                            <img src="D:\test-site\images\07.jpg" alt="项目5">
+                        </div>
+                        <div class="project-info">
+                            <h3>杜甫江阁</h3>
+                            <p>朱阁临江沐晚风，诗魂千载绕雕梁。橘洲烟波湘水阔，长沙明月照唐韵。</p>
+                        </div>
+                    </div>
+
+                    
+                    <!-- 项目6 -->
+                    <div class="project-card">
+                        <div class="project-image">
+                            <img src="D:\test-site\images\05.jpg" alt="项目6">
+                        </div>
+                        <div class="project-info">
+                            <h3>维港之夜</h3>
+                            <p>维港夜璀璨，霓虹映波光，楼宇织星河，东方珠跃动。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 联系表单 -->
+        <section id="contact">
+            <div class="container">
+                <div class="section-title">
+                    <h2>联系我</h2>
+                    <p>有兴趣合作吗？请随时与我联系</p>
+                </div>
+                <form class="contact-form">
+                    <div class="form-group">
+                        <label for="name">姓名</label>
+                        <input type="text" id="name" placeholder="请输入您的姓名" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">邮箱</label>
+                        <input type="email" id="email" placeholder="请输入您的邮箱" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">留言</label>
+                        <textarea id="message" placeholder="请输入您的留言" required></textarea>
+                    </div>
+                    <button type="submit" class="btn">发送消息</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 我的个人网页。oi，小鬼，拿图吱一声，侵权必究。</p>
+            <ul class="social-links">
+                <li><a href="#"><i class="fab fa-github"></i></a></li>
+                <li><a href="#"><i class="fab fa-linkedin"></i></a></li>
+                <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                <li><a href="#"><i class="fab fa-instagram"></i></a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if(targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // 导航栏激活状态
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-links a');
+            
+            let currentSection = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                
+                if(pageYOffset >= (sectionTop - 100)) {
+                    currentSection = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if(link.getAttribute('href') === '#' + currentSection) {
+                    link.classList.add('active');
+                }
+            });
+        });
+        
+        // 表单提交
+        const contactForm = document.querySelector('.contact-form');
+        if(contactForm) {
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const message = document.getElementById('message').value;
+                
+                // 在实际应用中，这里会发送数据到服务器
+                // 这里仅做演示用途
+                alert(`感谢您的留言，${name}！我们会尽快回复您。`);
+                contactForm.reset();
+            });
+        }
+    </script>
+</body>
+</html>
