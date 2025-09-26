@@ -18,8 +18,9 @@
         body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* 更换为你的本地背景图片 */
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)), 
-                        url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') no-repeat center center fixed;
+                        url('mountain-8370051_1280.jpg') no-repeat center center fixed;
             background-size: cover;
             color: #fff;
             overflow-x: hidden;
@@ -387,31 +388,31 @@
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
         }
         
-        /* 音量按钮 */
-        #volume-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: var(--light-bg);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            font-size: 20px;
+        /* 音乐控制按钮 */
+        #music-btn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            padding: 10px 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
-            color: var(--primary-color);
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             transition: all 0.3s;
-            z-index: 20;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
         
-        #volume-btn:hover {
-            transform: scale(1.1);
-            background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        #music-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        #music-btn.playing {
+            background: #2196F3;
         }
 
         /* 特效元素 */
@@ -536,47 +537,6 @@
             pointer-events: none;
             z-index: -1;
         }
-<script>
-    // 获取音频元素和按钮
-    var bgMusic = document.getElementById('bg-music');
-    var musicBtn = document.getElementById('music-btn');
-    
-    // 设置音量（30%音量，避免太吵）
-    bgMusic.volume = 0.3;
-    
-    // 按钮点击事件
-    musicBtn.addEventListener('click', function() {
-        if (bgMusic.paused) {
-            // 如果音乐是暂停状态，开始播放
-            bgMusic.play().then(function() {
-                musicBtn.innerHTML = '⏸️ 音乐播放中';
-                musicBtn.style.background = '#2196F3';
-                console.log('音乐开始播放');
-            }).catch(function(error) {
-                console.log('播放失败:', error);
-                musicBtn.innerHTML = '❌ 点击重试';
-                musicBtn.style.background = '#f44336';
-            });
-        } else {
-            // 如果音乐正在播放，暂停它
-            bgMusic.pause();
-            musicBtn.innerHTML = '🎵 开启音乐';
-            musicBtn.style.background = '#4CAF50';
-            console.log('音乐已暂停');
-        }
-    });
-    
-    // 同时支持页面任意位置点击播放（可选）
-    document.addEventListener('click', function(event) {
-        // 如果点击的不是音乐按钮本身，且音乐尚未播放
-        if (event.target !== musicBtn && bgMusic.paused) {
-            bgMusic.play().then(function() {
-                musicBtn.innerHTML = '⏸️ 音乐播放中';
-                musicBtn.style.background = '#2196F3';
-            });
-        }
-    });
-</script>
     </style>
 </head>
 <body>
@@ -587,9 +547,7 @@
     
     <div id="game">
         <!-- 音乐控制按钮 -->
-<button id="music-btn" style="position:fixed; top:10px; right:10px; z-index:1000; padding:10px; background:#4CAF50; color:white; border:none; border-radius:5px; cursor:pointer; font-size:14px;">
-    🎵 开启音乐
-</button>
+        <button id="music-btn">🎵 开启音乐</button>
 
         <div class="game-header">
             <div class="progress-container">
@@ -634,10 +592,10 @@
     </div>
 
     <!-- 背景音乐 -->
-<audio id="bg-music" loop>
-    <source src="relaxing-guitar-loop-v5-245859.mp3" type="audio/mpeg">
-    您的浏览器不支持音频元素
-</audio>
+    <audio id="bg-music" loop>
+        <source src="relaxing-guitar-loop-v5-245859.mp3" type="audio/mpeg">
+        您的浏览器不支持音频元素
+    </audio>
 
     <script>
         // 游戏元素
@@ -647,7 +605,7 @@
         const choices = document.getElementById('choices');
         const inventoryDiv = document.getElementById('inventory-items');
         const music = document.getElementById('bg-music');
-        const volumeBtn = document.getElementById('volume-btn');
+        const musicBtn = document.getElementById('music-btn');
         const player = document.getElementById('player');
         const effectsContainer = document.getElementById('effects-container');
         const locations = document.querySelectorAll('.location');
@@ -660,6 +618,43 @@
         let inventory = [];
         let muted = false;
         let gameActive = false;
+
+        // 音乐控制功能
+        function initMusicControls() {
+            // 设置音量
+            music.volume = 0.3;
+            
+            // 音乐按钮点击事件
+            musicBtn.addEventListener('click', function() {
+                if (music.paused) {
+                    music.play().then(() => {
+                        musicBtn.textContent = '⏸️ 音乐播放中';
+                        musicBtn.classList.add('playing');
+                    }).catch(error => {
+                        console.log('播放失败:', error);
+                        musicBtn.textContent = '❌ 点击重试';
+                    });
+                } else {
+                    music.pause();
+                    musicBtn.textContent = '🎵 开启音乐';
+                    musicBtn.classList.remove('playing');
+                }
+            });
+            
+            // 页面点击时尝试自动播放
+            document.addEventListener('click', function initAutoPlay() {
+                if (music.paused) {
+                    music.play().then(() => {
+                        musicBtn.textContent = '⏸️ 音乐播放中';
+                        musicBtn.classList.add('playing');
+                    }).catch(e => {
+                        // 自动播放被阻止是正常的
+                    });
+                }
+                // 移除监听器，避免重复绑定
+                document.removeEventListener('click', initAutoPlay);
+            });
+        }
 
         // 初始化背景粒子
         function initParticles() {
@@ -1008,7 +1003,7 @@
                     }, i * 100);
                 }
                 
-                if (Math.random() < 0.2) {
+                                if (Math.random() < 0.2) {
                     return "你打开宝箱，里面竟是一封古老的信：真正的宝藏是『知识』! (隐藏结局)";
                 }
                 if (Math.random() < 0.3) {
@@ -1024,7 +1019,7 @@
             if (gameActive) return;
             gameActive = true;
             
-                        // 禁用按钮
+            // 禁用按钮
             startBtn.disabled = true;
             resetBtn.disabled = true;
             
@@ -1102,29 +1097,17 @@
             }
         }
 
-        // 音量控制
-        volumeBtn.addEventListener('click', function() {
-            muted = !muted;
-            music.muted = muted;
-            volumeBtn.textContent = muted ? "🔇" : "🎵";
-            volumeBtn.style.color = muted ? "#ccc" : "var(--primary-color)";
-        });
-
         // 初始化游戏
         function initGame() {
+            // 初始化音乐控制
+            initMusicControls();
+            
             // 初始化粒子效果
             initParticles();
             
             // 设置初始玩家位置
             movePlayer("library");
             document.querySelector('.library').classList.add('active');
-            
-            // 尝试自动播放音乐（需要用户交互）
-            document.addEventListener('click', function initMusic() {
-                music.volume = 0.3;
-                music.play().catch(e => console.log("自动播放被阻止，需要用户交互"));
-                document.removeEventListener('click', initMusic);
-            });
             
             // 添加初始日志
             addLog("欢迎来到寻宝冒险游戏！", 'info');
@@ -1135,6 +1118,17 @@
                 createSparkle(100, 100);
                 createSparkle(700, 200);
             }, 1000);
+            
+            // 检查音频文件是否可加载
+            music.addEventListener('canplaythrough', function() {
+                console.log('背景音乐文件加载成功');
+            });
+            
+            music.addEventListener('error', function(e) {
+                console.log('背景音乐文件加载失败:', e);
+                musicBtn.textContent = '❌ 音乐加载失败';
+                musicBtn.style.background = '#f44336';
+            });
         }
 
         // 页面加载完成后初始化游戏
