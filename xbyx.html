@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>寻宝冒险游戏</title>
+    <style>
+        :root {
+            --primary-color: #FFD700;
+            --secondary-color: #8B4513;
+            --accent-color: #4CAF50;
+            --danger-color: #F44336;
+            --info-color: #2196F3;
+            --dark-bg: rgba(0, 0, 0, 0.75);
+            --light-bg: rgba(255, 255, 255, 0.1);
+            --border-radius: 12px;
+        }
+        
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)), 
+                        url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 3em;
+            text-align: center;
+            margin: 20px 0;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.8);
+            animation: titleGlow 3s infinite alternate;
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+        }
+        
+        h1::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+        }
+        
+        #game {
+            max-width: 900px;
+            width: 100%;
+            margin: 20px auto;
+            background: var(--dark-bg);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            backdrop-filter: blur(5px);
+        }
+        
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .progress-container {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            background: var(--light-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 5px;
+            height: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #ff9800, #ff5722, #ff9800);
+            width: 0%;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 15px rgba(255, 152, 0, 0.7);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: #ccc;
+            margin-top: 5px;
+        }
+        
+        .map-container {
+            position: relative;
+            margin: 20px 0;
+            background: rgba(10, 10, 20, 0.7);
+            height: 220px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            border: 2px solid var(--secondary-color);
+            box-shadow: 0 0 20px rgba(139, 69, 19, 0.5), inset 0 0 20px rgba(0, 0, 0, 0.5);
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(30, 30, 60, 0.8) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(40, 20, 10, 0.6) 0%, transparent 50%);
+        }
+        
+        .map-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        .player {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--primary-color);
+            top: 20px;
+            left: 40px;
+            transition: all 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 10;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+        
+        .player::after {
+            content: "▲";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--primary-color);
+            font-size: 12px;
+            text-shadow: 0 0 5px black;
+        }
+        
+        .player-trail {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: rgba(255, 215, 0, 0.5);
+            border-radius: 50%;
+            z-index: 5;
+            opacity: 0;
+            animation: fadeTrail 1.5s forwards;
+        }
+        
+        .location {
+            position: absolute;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            z-index: 5;
+            transition: all 0.4s;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid transparent;
+        }
+        
+        .location:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .location.active {
+            transform: scale(1.2);
+            filter: drop-shadow(0 0 10px gold);
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid gold;
+            z-index: 11;
+        }
+        
+        .library { top: 20px; left: 40px; }
+        .cave { top: 80px; left: 180px; }
+        .temple { top: 40px; left: 320px; }
+        .treasure { top: 100px; left: 460px; }
+        .village { top: 140px; left: 250px; }
+        .river { top: 60px; left: 120px; }
+        
+        .game-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .game-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .inventory {
+            background: var(--light-bg);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            height: fit-content;
+        }
+        
+        .inventory h3 {
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .inventory-items {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            min-height: 60px;
+        }
+        
+        .item {
+            padding: 8px 12px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2));
+            border-radius: 6px;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            animation: itemPulse 3s infinite;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        .log {
+            text-align: left;
+            background: var(--light-bg);
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .log-entry {
+            padding: 8px 12px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.5s;
+            border-left: 3px solid;
+        }
+        
+        .success { border-left-color: var(--accent-color); }
+        .warning { border-left-color: var(--primary-color); }
+        .info    { border-left-color: var(--info-color); }
+        .error   { border-left-color: var(--danger-color); }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .controls button {
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, var(--accent-color), #2E7D32);
+            color: white;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            font-weight: bold;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .controls button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .controls button:hover {
+            background: linear-gradient(45deg, #66BB6A, #388E3C);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .controls button:hover::before {
+            left: 100%;
+        }
+        
+        .controls button:active {
+            transform: translateY(-1px);
+        }
+        
+        .controls button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .controls button:disabled:hover::before {
+            left: -100%;
+        }
+        
+        #choices {
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        #choices button {
+            padding: 12px 20px;
+            margin: 8px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(45deg, var(--info-color), #1565C0);
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+            font-weight: bold;
+        }
+        
+        #choices button:hover {
+            background: linear-gradient(45deg, #42A5F5, #1976D2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 音量按钮 */
+        #volume-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--light-bg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #volume-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        /* 特效元素 */
+        .effects-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 15;
+        }
+        
+        .lightning {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 30%, rgba(255,255,255,0.8) 50%, transparent 70%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .fire-effect {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,100,0,0.8) 0%, rgba(255,50,0,0) 70%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .sparkle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: gold;
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .floating-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 215, 0, 0.7);
+            border-radius: 50%;
+            animation: float 5s infinite linear;
+        }
+
+        /* 动画定义 */
+        @keyframes titleGlow {
+            0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.8); }
+            100% { text-shadow: 0 0 20px gold, 0 0 30px orange, 2px 2px 4px rgba(0, 0, 0, 0.8); }
+        }
+        
+        @keyframes fadeTrail {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        
+        @keyframes itemPulse {
+            0% { box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); }
+            50% { box-shadow: 0 2px 10px gold, 0 0 15px rgba(255, 215, 0, 0.5); }
+            100% { box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); }
+        }
+        
+        @keyframes lightningFlash {
+            0% { opacity: 0; }
+            10% { opacity: 0.8; }
+            20% { opacity: 0; }
+            30% { opacity: 0.6; }
+            40% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+        
+        @keyframes fireFlicker {
+            0% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 0.7; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.5); }
+        }
+        
+        @keyframes sparkleEffect {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+        
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) translateX(20px); opacity: 0; }
+        }
+        
+        /* 添加一些浮动粒子 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景粒子效果 -->
+    <div class="particles" id="particles"></div>
+    
+    <h1>🏝️ 寻宝冒险游戏</h1>
+    
+    <div id="game">
+        <!-- 音量控制按钮 -->
+        <button id="volume-btn">🎵</button>
+
+        <div class="game-header">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div id="progress" class="progress"></div>
+                </div>
+                <div class="progress-text">探险进度: <span id="progress-percent">0%</span></div>
+            </div>
+        </div>
+        
+        <!-- 小地图 -->
+        <div class="map-container">
+            <div class="map-grid"></div>
+            <div id="player" class="player"></div>
+            <div class="location library">📚 图书馆</div>
+            <div class="location cave">🕳 洞穴</div>
+            <div class="location temple">🏛 神庙</div>
+            <div class="location treasure">💎 宝藏</div>
+            <div class="location village">🏘️ 村庄</div>
+            <div class="location river">🌊 河流</div>
+            
+            <!-- 特效容器 -->
+            <div id="effects-container" class="effects-container"></div>
+        </div>
+
+        <div class="game-content">
+            <!-- 道具栏 -->
+            <div class="inventory">
+                <h3>🎒 道具栏</h3>
+                <div id="inventory-items" class="inventory-items">（空空如也）</div>
+            </div>
+
+            <div class="log" id="log"></div>
+        </div>
+        
+        <div id="choices"></div>
+        
+        <div class="controls">
+            <button id="start-btn" onclick="startGame()">开始寻宝</button>
+            <button id="reset-btn" onclick="resetGame()">重置游戏</button>
+        </div>
+    </div>
+
+    <!-- 背景音乐 -->
+    <audio id="bg-music" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/03/09/audio_d5d91fa9f4.mp3?filename=tribal-jungle-11155.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // 游戏元素
+        const logDiv = document.getElementById('log');
+        const progressBar = document.getElementById('progress');
+        const progressPercent = document.getElementById('progress-percent');
+        const choices = document.getElementById('choices');
+        const inventoryDiv = document.getElementById('inventory-items');
+        const music = document.getElementById('bg-music');
+        const volumeBtn = document.getElementById('volume-btn');
+        const player = document.getElementById('player');
+        const effectsContainer = document.getElementById('effects-container');
+        const locations = document.querySelectorAll('.location');
+        const startBtn = document.getElementById('start-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const particlesContainer = document.getElementById('particles');
+
+        // 游戏状态
+        let progress = 0;
+        let inventory = [];
+        let muted = false;
+        let gameActive = false;
+
+        // 初始化背景粒子
+        function initParticles() {
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'floating-particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 5) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // 添加日志条目
+        function addLog(message, type="info") {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = message;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // 更新进度条
+        function updateProgress(val) {
+            progress = Math.min(100, Math.max(0, progress + val));
+            progressBar.style.width = progress + '%';
+            progressPercent.textContent = progress + '%';
+        }
+
+        // 更新道具栏
+        function updateInventory() {
+            inventoryDiv.innerHTML = '';
+            if (inventory.length === 0) {
+                inventoryDiv.textContent = '（空空如也）';
+                return;
+            }
+            inventory.forEach(item => {
+                const span = document.createElement('span');
+                span.className = 'item';
+                span.textContent = item;
+                inventoryDiv.appendChild(span);
+            });
+        }
+
+        // 重置游戏
+        function resetGame() {
+            logDiv.innerHTML = '';
+            progress = 0;
+            progressBar.style.width = '0%';
+            progressPercent.textContent = '0%';
+            inventory = [];
+            updateInventory();
+            choices.style.display = 'none';
+            movePlayer("library");
+            addLog("游戏已重置，请点击【开始寻宝】重新开始。", 'warning');
+            gameActive = false;
+            
+            // 重置所有地点状态
+            locations.forEach(loc => loc.classList.remove('active'));
+            document.querySelector('.library').classList.add('active');
+            
+            // 启用按钮
+            startBtn.disabled = false;
+            resetBtn.disabled = false;
+        }
+
+        // 延迟函数
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // 显示选择按钮
+        function showChoices(options) {
+            return new Promise(resolve => {
+                choices.innerHTML = '';
+                choices.style.display = 'flex';
+                choices.style.flexWrap = 'wrap';
+                choices.style.justifyContent = 'center';
+                
+                options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.textContent = opt.label;
+                    btn.onclick = () => {
+                        choices.style.display = 'none';
+                        resolve(opt.value);
+                    };
+                    choices.appendChild(btn);
+                });
+            });
+        }
+
+        // 移动玩家
+        function movePlayer(location) {
+            // 创建移动轨迹
+            createPlayerTrail();
+            
+            // 更新地点激活状态
+            locations.forEach(loc => loc.classList.remove('active'));
+            document.querySelector(`.${location}`).classList.add('active');
+            
+            switch(location) {
+                case "library":
+                    player.style.top = "20px"; player.style.left = "40px"; break;
+                case "cave":
+                    player.style.top = "80px"; player.style.left = "180px"; break;
+                case "temple":
+                    player.style.top = "40px"; player.style.left = "320px"; break;
+                case "treasure":
+                    player.style.top = "100px"; player.style.left = "460px"; break;
+                case "village":
+                    player.style.top = "140px"; player.style.left = "250px"; break;
+                case "river":
+                    player.style.top = "60px"; player.style.left = "120px"; break;
+            }
+        }
+
+        // 创建玩家移动轨迹
+        function createPlayerTrail() {
+            const trail = document.createElement('div');
+            trail.className = 'player-trail';
+            trail.style.top = player.style.top;
+            trail.style.left = player.style.left;
+            document.querySelector('.map-container').appendChild(trail);
+            
+            // 自动移除轨迹
+            setTimeout(() => {
+                if (trail.parentNode) {
+                    trail.parentNode.removeChild(trail);
+                }
+            }, 1500);
+        }
+
+        // 特效函数
+        function createLightning() {
+            const lightning = document.createElement('div');
+            lightning.className = 'lightning';
+            effectsContainer.appendChild(lightning);
+            
+            lightning.style.animation = 'lightningFlash 2s forwards';
+            
+            setTimeout(() => {
+                if (lightning.parentNode) {
+                    lightning.parentNode.removeChild(lightning);
+                }
+            }, 2000);
+        }
+
+        function createFireEffect(x, y) {
+            const fire = document.createElement('div');
+            fire.className = 'fire-effect';
+            fire.style.left = `${x}px`;
+            fire.style.top = `${y}px`;
+            effectsContainer.appendChild(fire);
+            
+            fire.style.animation = 'fireFlicker 1.5s forwards';
+            
+            setTimeout(() => {
+                if (fire.parentNode) {
+                    fire.parentNode.removeChild(fire);
+                }
+            }, 1500);
+        }
+
+        function createSparkle(x, y) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+            sparkle.style.left = `${x}px`;
+            sparkle.style.top = `${y}px`;
+            effectsContainer.appendChild(sparkle);
+            
+            sparkle.style.animation = 'sparkleEffect 1s forwards';
+            
+            setTimeout(() => {
+                if (sparkle.parentNode) {
+                    sparkle.parentNode.removeChild(sparkle);
+                }
+            }, 1000);
+        }
+
+        function shakeScreen() {
+            document.getElementById('game').style.animation = 'shake 0.5s';
+            setTimeout(() => {
+                document.getElementById('game').style.animation = '';
+            }, 500);
+        }
+
+        // 游戏逻辑
+        const TreasureMap = {
+            startJourney: async function() {
+                movePlayer("library");
+                addLog("你踏上了神秘的寻宝之旅...", 'info');
+                updateProgress(10);
+                await delay(1000);
+                return "传说宝藏藏在远古的神庙中。";
+            },
+            
+            exploreLibrary: async function() {
+                movePlayer("library");
+                await delay(1200);
+                addLog("你在图书馆发现了一本古书，书中记载了宝藏的线索。", 'info');
+                inventory.push("古书");
+                updateInventory();
+                return "古书记载：宝藏被藏在神庙最深处的密室中。";
+            },
+            
+            crossRiver: async function() {
+                movePlayer("river");
+                await delay(1000);
+                addLog("你来到一条湍急的河流前，需要想办法过河。", 'info');
+                const choice = await showChoices([
+                    { label: "寻找浅滩过河", value: "ford" },
+                    { label: "制作简易木筏", value: "raft" },
+                    { label: "绕道而行", value: "detour" }
+                ]);
+                
+                if (choice === "ford") {
+                    if (Math.random() < 0.4) {
+                        createLightning();
+                        shakeScreen();
+                        throw new Error("河水突然暴涨，你被冲走了！");
+                    }
+                    return "你成功找到了浅滩，安全过河。";
+                } else if (choice === "raft") {
+                    inventory.push("木筏");
+                    updateInventory();
+                    return "你制作了简易木筏，顺利过河。";
+                } else {
+                    updateProgress(-5); // 绕道消耗时间
+                    return "你选择了绕道，虽然多花了时间但安全到达对岸。";
+                }
+            },
+            
+            visitVillage: async function() {
+                movePlayer("village");
+                await delay(1200);
+                addLog("你来到一个小村庄，村民们对你很友好。", 'info');
+                const choice = await showChoices([
+                    { label: "向村民打听消息", value: "ask" },
+                    { label: "在村庄休息", value: "rest" },
+                    { label: "直接离开", value: "leave" }
+                ]);
+                
+                if (choice === "ask") {
+                    if (Math.random() < 0.7) {
+                        inventory.push("神庙地图");
+                        updateInventory();
+                        return "一位老者给了你一张神庙的地图，这会对你有帮助！";
+                    }
+                    return "村民们知道的不多，但你得到了一些食物补给。";
+                } else if (choice === "rest") {
+                    updateProgress(5); // 休息恢复体力
+                    return "你在村庄休息了一晚，体力恢复了。";
+                } else {
+                    return "你匆匆离开了村庄，继续你的旅程。";
+                }
+            },
+            
+            exploreCave: async function() {
+                movePlayer("cave");
+                await delay(1200);
+                
+                // 随机事件：洞穴中的火光
+                if (Math.random() < 0.5) {
+                    createFireEffect(160, 60);
+                    addLog("洞穴深处有奇怪的火光...", 'warning');
+                    await delay(800);
+                }
+                
+                addLog("洞穴内分成了两条路，你选择哪条？", 'info');
+                const choice = await showChoices([
+                    { label: "左边(有光亮)", value: "left" },
+                    { label: "右边(阴暗狭窄)", value: "right" },
+                    { label: "探索洞穴入口", value: "entrance" }
+                ]);
+                
+                if (choice === "left") {
+                    inventory.push("火把");
+                    updateInventory();
+                    createFireEffect(160, 60);
+                    return "你在光亮处发现了一只火把! 它会帮助你在黑暗中前进。";
+                } else if (choice === "right") {
+                    if (Math.random() < 0.5) {
+                        createLightning();
+                        shakeScreen();
+                        throw new Error("你掉进陷阱，游戏失败!");
+                    }
+                    return "小心翼翼穿过黑暗通道，你找到了一条通往神庙的密道!";
+                } else {
+                    if (inventory.includes("古书")) {
+                        inventory.push("神秘钥匙");
+                        updateInventory();
+                        createSparkle(160, 70);
+                        return "你在洞穴入口发现了一把神秘的钥匙，可能与宝藏有关！";
+                    }
+                    return "你在洞穴入口发现了一些古老的壁画，但没有更多收获。";
+                }
+            },
+            
+            searchTemple: async function() {
+                movePlayer("temple");
+                await delay(1500);
+                
+                // 随机事件：神庙震动
+                if (Math.random() < 0.3) {
+                    shakeScreen();
+                    addLog("神庙突然震动起来！", 'warning');
+                    await delay(800);
+                }
+                
+                addLog("你在神庙门口遇到守卫，怎么办？", 'warning');
+                const choice = await showChoices([
+                    { label: "强行突破", value: "fight" },
+                    { label: "偷偷潜行", value: "sneak" },
+                    { label: "尝试贿赂", value: "bribe" }
+                ]);
+                
+                if (choice === "fight") {
+                    if (inventory.includes("火把") && Math.random() > 0.4) {
+                        createFireEffect(300, 20);
+                        return "你用火把吓退了守卫，顺利进入神庙!";
+                    } else {
+                        throw new Error("守卫太强大，你被击败了...");
+                    }
+                } else if (choice === "sneak") {
+                    if (Math.random() < 0.6) return "你成功绕过守卫，悄悄进入了神庙!";
+                    throw new Error("潜行失败，被守卫发现!");
+                } else {
+                    if (inventory.includes("古书")) {
+                        return "你展示古书，守卫认出你是被选中的人，让你进入神庙!";
+                    }
+                    throw new Error("你没有足够贵重的东西贿赂守卫!");
+                }
+            },
+            
+            openTreasureBox: async function() {
+                movePlayer("treasure");
+                await delay(1200);
+                
+                // 宝藏开启特效
+                for (let i = 0; i < 10; i++) {
+                    setTimeout(() => {
+                        createSparkle(
+                            Math.random() * 400 + 430,
+                            Math.random() * 100 + 80
+                        );
+                    }, i * 100);
+                }
+                
+                if (Math.random() < 0.2) {
+                    return "你打开宝箱，里面竟是一封古老的信：真正的宝藏是『知识』! (隐藏结局)";
+                }
+                if (Math.random() < 0.3) {
+                    throw new Error("箱子是空的，坏结局!");
+                }
+                return "恭喜! 你找到了一颗璀璨的" + 
+                       ["钻石","红宝石","蓝宝石","祖母绿","神秘水晶"][Math.floor(Math.random()*5)] + "!";
+            }
+        };
+
+        // 开始游戏
+        async function startGame() {
+            if (gameActive) return;
+            gameActive = true;
+            
+                        // 禁用按钮
+            startBtn.disabled = true;
+            resetBtn.disabled = true;
+            
+            try {
+                logDiv.innerHTML = '';
+                inventory = [];
+                updateInventory();
+                progress = 0;
+                updateProgress(0);
+                
+                // 开始游戏流程
+                addLog("寻宝冒险开始！", 'success');
+                
+                // 第一步：开始旅程
+                let result = await TreasureMap.startJourney();
+                addLog(result, 'info');
+                await delay(1500);
+                
+                // 第二步：探索图书馆
+                result = await TreasureMap.exploreLibrary();
+                addLog(result, 'info');
+                updateProgress(10);
+                await delay(1500);
+                
+                // 第三步：过河
+                result = await TreasureMap.crossRiver();
+                addLog(result, 'success');
+                updateProgress(15);
+                await delay(1500);
+                
+                // 第四步：访问村庄
+                result = await TreasureMap.visitVillage();
+                addLog(result, 'info');
+                updateProgress(10);
+                await delay(1500);
+                
+                // 第五步：探索洞穴
+                result = await TreasureMap.exploreCave();
+                addLog(result, 'success');
+                updateProgress(15);
+                await delay(1500);
+                
+                // 第六步：搜索神庙
+                result = await TreasureMap.searchTemple();
+                addLog(result, 'success');
+                updateProgress(20);
+                await delay(1500);
+                
+                // 第七步：打开宝藏
+                result = await TreasureMap.openTreasureBox();
+                addLog("✨ " + result, 'success');
+                updateProgress(30);
+                
+                // 胜利特效
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        createSparkle(
+                            Math.random() * 800 + 50,
+                            Math.random() * 400 + 50
+                        );
+                    }, i * 150);
+                }
+                
+                addLog("🎉 恭喜你完成了寻宝冒险！", 'success');
+                
+            } catch (error) {
+                addLog("💀 " + error.message, 'error');
+                createLightning();
+                shakeScreen();
+                addLog("游戏结束！点击【重置游戏】重新开始。", 'warning');
+            } finally {
+                // 重新启用重置按钮
+                resetBtn.disabled = false;
+                gameActive = false;
+            }
+        }
+
+        // 音量控制
+        volumeBtn.addEventListener('click', function() {
+            muted = !muted;
+            music.muted = muted;
+            volumeBtn.textContent = muted ? "🔇" : "🎵";
+            volumeBtn.style.color = muted ? "#ccc" : "var(--primary-color)";
+        });
+
+        // 初始化游戏
+        function initGame() {
+            // 初始化粒子效果
+            initParticles();
+            
+            // 设置初始玩家位置
+            movePlayer("library");
+            document.querySelector('.library').classList.add('active');
+            
+            // 尝试自动播放音乐（需要用户交互）
+            document.addEventListener('click', function initMusic() {
+                music.volume = 0.3;
+                music.play().catch(e => console.log("自动播放被阻止，需要用户交互"));
+                document.removeEventListener('click', initMusic);
+            });
+            
+            // 添加初始日志
+            addLog("欢迎来到寻宝冒险游戏！", 'info');
+            addLog("点击【开始寻宝】按钮开始你的冒险。", 'info');
+            
+            // 添加一些视觉特效
+            setTimeout(() => {
+                createSparkle(100, 100);
+                createSparkle(700, 200);
+            }, 1000);
+        }
+
+        // 页面加载完成后初始化游戏
+        window.onload = initGame;
+    </script>
+</body>
+</html>
